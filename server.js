@@ -100,12 +100,16 @@ function stepSimulation(dtUnits) {
   const agents = arenaState.agents;
   const factions = arenaState.factions;
 
+// Fast faction lookup
+  const factionMap = {};
+  for (const f of factions) factionMap[f.id] = f;
+  
   for (const agent of agents) {
     const jitter = 0.12;
     agent.vx += (Math.random() - 0.5) * jitter * dtUnits;
     agent.vy += (Math.random() - 0.5) * jitter * dtUnits;
 
-    const faction = factions.find((f) => f.id === agent.factionId);
+const faction = factionMap[agent.factionId];
     if (faction) {
       const fx = (faction.cx - agent.x) * 0.0008 * dtUnits;
       const fy = (faction.cy - agent.y) * 0.0008 * dtUnits;
