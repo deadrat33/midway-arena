@@ -118,12 +118,12 @@ const faction = factionMap[agent.factionId];
     }
 
     const maxSpeed = 2.5;
-    const speed = Math.hypot(agent.vx, agent.vy);
-    if (speed > maxSpeed) {
-      agent.vx = (agent.vx / speed) * maxSpeed;
-      agent.vy = (agent.vy / speed) * maxSpeed;
+    const speed = agent.vx * agent.vx + agent.vy * agent.vy;
+    if (speed > maxSpeed * maxSpeed) {
+  const mag = Math.sqrt(speed);
+  agent.vx = (agent.vx / mag) * maxSpeed;
+  agent.vy = (agent.vy / mag) * maxSpeed;
     }
-
     agent.x += agent.vx * dtUnits;
     agent.y += agent.vy * dtUnits;
 
@@ -238,7 +238,7 @@ wss.on("connection", (ws) => {
 
   ws.on("close", () => {
     console.log("Client disconnected");
-  });
+  }); 
 });
 
 // ====== MAIN LOOP ======
