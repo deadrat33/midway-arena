@@ -1,148 +1,98 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Midway – Shared Arena</title>
+  <meta charset="utf-8" />
+  <title>MIDWAY – Shared Swarm Arena</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    * {
-      box-sizing: border-box;
+    html, body {
       margin: 0;
       padding: 0;
-    }
-
-    body {
-      margin: 0;
-      overflow: hidden;
+      height: 100%;
       background: #000;
-      color: #fff;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
-    }
-
-    #midway {
-      position: fixed;
-      inset: 0;
-      display: block;
-    }
-
-    #ui {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      padding: 10px 14px;
-      background: rgba(0, 0, 0, 0.7);
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      max-width: 260px;
-      z-index: 10;
-      backdrop-filter: blur(4px);
-    }
-
-    #title {
-      font-size: 16px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-      opacity: 0.9;
-    }
-
-    #subtitle {
-      font-size: 11px;
-      line-height: 1.3;
-      opacity: 0.7;
-      margin-bottom: 8px;
-    }
-
-    #controls {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      background: rgba(255, 255, 255, 0.04);
-      color: #fff;
-      padding: 4px 8px;
-      font-size: 11px;
-      border-radius: 4px;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    button:hover {
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    #stats {
-      font-size: 11px;
-      max-height: 150px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-
-    .faction-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 3px;
-      white-space: nowrap;
-    }
-
-    .faction-color {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      border: 1px solid #fff;
-      flex-shrink: 0;
-    }
-
-    .faction-label {
-      flex: 1;
+      color: #eee;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       overflow: hidden;
-      text-overflow: ellipsis;
     }
-
-    .faction-label strong {
-      font-weight: 600;
+    #ui {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      width: 260px;
+      background: rgba(0,0,0,0.8);
+      border-radius: 8px;
+      padding: 10px 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.7);
+      font-size: 13px;
+      z-index: 10;
     }
-
-    .hint {
-      font-size: 10px;
-      opacity: 0.6;
-      margin-top: 4px;
+    #title {
+      letter-spacing: 0.18em;
+      font-size: 16px;
+      margin-bottom: 6px;
     }
-
+    #controls button {
+      margin: 4px 4px 4px 0;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid #555;
+      background: #111;
+      color: #eee;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    #controls button:hover {
+      background: #222;
+    }
+    #stats {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 6px;
+      font-size: 12px;
+    }
     #connectionStatus {
-      font-size: 10px;
-      opacity: 0.75;
+      margin-top: 6px;
+      font-size: 11px;
+      color: #bbb;
+    }
+    .sectionTitle {
+      font-weight: 600;
       margin-top: 4px;
+      margin-bottom: 2px;
+      font-size: 12px;
+    }
+    .hint {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #888;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
     }
   </style>
 </head>
 <body>
-  <canvas id="midway"></canvas>
-
   <div id="ui">
     <div id="title">MIDWAY</div>
-    <div id="subtitle">
+    <div style="font-size: 11px; margin-bottom: 6px;">
       Shared swarm arena. Everyone at this URL sees the same universe.
     </div>
-
     <div id="controls">
       <button id="spawnFaction">Spawn New Faction</button>
       <button id="addChaos">Nudge Arena</button>
     </div>
-
     <div id="stats"></div>
     <div id="connectionStatus">Connecting…</div>
     <div class="hint">
-      Open this page on two phones. When one spawns a faction, both see it.
+      Open this page on two phones. When one spawns a faction or taps the arena,
+      both see it. Tap anywhere to steer your own swarms.
     </div>
   </div>
+
+  <canvas id="midway"></canvas>
 
   <script>
     const canvas = document.getElementById("midway");
@@ -150,119 +100,142 @@
     const statsDiv = document.getElementById("stats");
     const connectionStatus = document.getElementById("connectionStatus");
 
-    function resize() {
-  const scale = 0.8; // render at 80% internal resolution
-  canvas.width = window.innerWidth * scale;
-  canvas.height = window.innerHeight * scale;
-  canvas.style.width = "100vw";
-  canvas.style.height = "100vh";
-    }
-    window.addEventListener("resize", resize);
-    resize();
-
     const ARENA_WIDTH = 1280;
     const ARENA_HEIGHT = 720;
 
-    let remoteState = null;
+    function resize() {
+      const scale = 0.8;
+      canvas.width = window.innerWidth * scale;
+      canvas.height = window.innerHeight * scale;
+      canvas.style.width = "100vw";
+      canvas.style.height = "100vh";
+    }
+    window.addEventListener("resize", resize);
+    resize();
 
     function randomColorFromHue(hue) {
       return `hsl(${hue}, 80%, 60%)`;
     }
 
+    const PLAYER_ID_KEY = "midwayPlayerId";
+    let myPlayerId = localStorage.getItem(PLAYER_ID_KEY);
+    if (!myPlayerId) {
+      myPlayerId = "P" + Math.random().toString(36).slice(2, 8);
+      localStorage.setItem(PLAYER_ID_KEY, myPlayerId);
+    }
+
     let ws = null;
+    let remoteState = null;
 
     function connectWebSocket() {
       const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-      const wsUrl = `${protocol}://${window.location.host}/ws`;
-
+      const wsUrl = protocol + "://" + window.location.host;
       ws = new WebSocket(wsUrl);
 
-      ws.onopen = () => {
+      ws.addEventListener("open", () => {
         connectionStatus.textContent = "Connected to Midway server.";
-      };
+      });
 
-      ws.onclose = () => {
+      ws.addEventListener("close", () => {
         connectionStatus.textContent = "Disconnected. Reconnecting…";
         setTimeout(connectWebSocket, 1500);
-      };
+      });
 
-      ws.onerror = () => {
-        connectionStatus.textContent = "WebSocket error.";
-      };
+      ws.addEventListener("error", () => {
+        connectionStatus.textContent = "Connection error.";
+      });
 
-      ws.onmessage = (event) => {
+      ws.addEventListener("message", (event) => {
+        let msg;
         try {
-          const msg = JSON.parse(event.data);
-          if (msg.type === "state") {
-            remoteState = msg.state;
-            updateStatsPanel();
-          }
-        } catch (err) {
-          console.error("Invalid message from server:", err);
+          msg = JSON.parse(event.data);
+        } catch {
+          return;
         }
-      };
+        if (msg.type === "state") {
+          remoteState = msg.state;
+          updateStatsPanel();
+        }
+      });
     }
 
     connectWebSocket();
 
     document.getElementById("spawnFaction").addEventListener("click", () => {
       if (!ws || ws.readyState !== WebSocket.OPEN) return;
-      ws.send(
-        JSON.stringify({
-          type: "command",
-          command: "spawnFaction"
-        })
-      );
+      ws.send(JSON.stringify({
+        type: "spawnFaction",
+        playerId: myPlayerId
+      }));
     });
 
     document.getElementById("addChaos").addEventListener("click", () => {
       if (!ws || ws.readyState !== WebSocket.OPEN) return;
-      ws.send(
-        JSON.stringify({
-          type: "command",
-          command: "chaosNudge"
-        })
-      );
+      ws.send(JSON.stringify({ type: "addChaos" }));
+    });
+
+    canvas.addEventListener("click", (event) => {
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      if (!remoteState) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const nx = (event.clientX - rect.left) / rect.width;
+      const ny = (event.clientY - rect.top) / rect.height;
+
+      const x = nx * ARENA_WIDTH;
+      const y = ny * ARENA_HEIGHT;
+
+      ws.send(JSON.stringify({
+        type: "focusPoint",
+        playerId: myPlayerId,
+        x,
+        y
+      }));
     });
 
     function updateStatsPanel() {
-      if (!statsDiv) return;
-      const state = remoteState;
-      if (!state || !state.factions || !state.agents) {
-        statsDiv.innerHTML =
-          "<em>Waiting for server state…</em>";
+      if (!remoteState) {
+        statsDiv.innerHTML = "";
         return;
       }
 
-      const factions = state.factions;
-      const agents = state.agents;
-
-      if (!factions.length) {
-        statsDiv.innerHTML =
-          "<em>No factions alive yet. Tap “Spawn New Faction”.</em>";
-        return;
-      }
+      const factions = remoteState.factions || [];
+      const agents = remoteState.agents || [];
 
       const counts = {};
-      for (const f of factions) counts[f.id] = 0;
       for (const a of agents) {
-        if (counts[a.factionId] != null) counts[a.factionId]++;
+        counts[a.factionId] = (counts[a.factionId] || 0) + 1;
+      }
+
+      // Player scores
+      const playerScores = {};
+      for (const f of factions) {
+        const owner = f.ownerId || "Arena";
+        const c = counts[f.id] || 0;
+        playerScores[owner] = (playerScores[owner] || 0) + c;
       }
 
       let html = "";
-      for (const f of factions) {
-        const color = randomColorFromHue(f.colorHue);
-        const count = counts[f.id] || 0;
-        html += `
-          <div class="faction-row">
-            <span class="faction-color" style="background:${color}"></span>
-            <div class="faction-label">
-              <strong>${f.id}</strong>
-              &nbsp;–&nbsp;${count} agents
-            </div>
-          </div>
-        `;
+
+      html += `<div class="sectionTitle">Players</div>`;
+      const entries = Object.entries(playerScores).sort((a, b) => b[1] - a[1]);
+      for (const [owner, score] of entries) {
+        const label = owner === myPlayerId ? "You" : owner;
+        html += `<div>${label} – ${score} agents</div>`;
       }
+      html += `<hr />`;
+
+      html += `<div class="sectionTitle">Factions</div>`;
+      for (const f of factions) {
+        const c = counts[f.id] || 0;
+        const owner = f.ownerId || "Arena";
+        const ownerLabel = owner === myPlayerId ? "You" : owner;
+        html += `<div>
+          <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${randomColorFromHue(f.colorHue)};margin-right:4px;"></span>
+          ${f.id} – ${c} agents <span style="color:#888;">(${ownerLabel})</span>
+        </div>`;
+      }
+
       statsDiv.innerHTML = html;
     }
 
@@ -294,7 +267,7 @@
       const offsetY = (height - ARENA_HEIGHT * s) / 2;
 
       for (const a of agents) {
-        const color = factionColors[a.factionId] || "white";
+        const color = factionColors[a.factionId] || "#ffffff";
         const x = offsetX + a.x * s;
         const y = offsetY + a.y * s;
         const r = a.r * s;
@@ -311,4 +284,4 @@
     requestAnimationFrame(draw);
   </script>
 </body>
-  </html>
+</html>
