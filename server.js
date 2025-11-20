@@ -179,10 +179,26 @@ function stepSimulation(dtUnits) {
 
 // ====== WEBSOCKET BROADCAST ======
 function broadcastState() {
+  // Build a lightweight snapshot for clients
+  const snapshot = {
+    tick: arenaState.tick,
+    factions: arenaState.factions.map((f) => ({
+      id: f.id,
+      colorHue: f.colorHue
+    })),
+    agents: arenaState.agents.map((a) => ({
+      x: a.x,
+      y: a.y,
+      r: a.radius,
+      factionId: a.factionId
+    }))
+  };
+
   const payload = JSON.stringify({
     type: "state",
-    state: arenaState
+    state: snapshot
   });
+
   for (const ws of wss.clients) {
     if (ws.readyState === WebSocket.OPEN) {
       ws.send(payload);
@@ -225,7 +241,7 @@ wss.on("connection", (ws) => {
 const FIXED_DT_MS = 16;
 let lastSimTime = Date.now();
 
-const BROADCAST_INTERVAL_MS = 250;
+const BROADCAST_INTERVAL_MS = 100;
 let lastBroadcastTime = Date.now();
 
 setInterval(() => {
