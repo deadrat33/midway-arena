@@ -66,7 +66,11 @@ function spawnNewFaction(ownerId) {
 }
 
 function ensureInitialFactions() {
-  if (arenaState.factions.length === 0) {
+  // If we ever end up with no factions OR no agents, repopulate
+  if (arenaState.factions.length === 0 || arenaState.agents.length === 0) {
+    arenaState.factions = [];
+    arenaState.agents = [];
+
     const f1 = {
       id: makeFactionId(),
       colorHue: randomHue(),
@@ -81,6 +85,7 @@ function ensureInitialFactions() {
       cx: ARENA_WIDTH * 0.7,
       cy: ARENA_HEIGHT * 0.5
     };
+
     arenaState.factions.push(f1, f2);
     spawnAgentsForFaction(f1, 33);
     spawnAgentsForFaction(f2, 33);
