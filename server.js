@@ -85,7 +85,7 @@ function spawnNewFaction() {
     cy: ARENA_HEIGHT * (0.2 + 0.8 * Math.random())
   };
   arenaState.factions.push(faction);
-  spawnAgentsForFaction(faction, 60);
+  spawnAgentsForFaction(faction, 33);
 }
 
 function applyChaosNudge() {
