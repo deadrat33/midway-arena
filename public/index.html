@@ -151,8 +151,11 @@
     const connectionStatus = document.getElementById("connectionStatus");
 
     function resize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+  const scale = 0.8; // render at 80% internal resolution
+  canvas.width = window.innerWidth * scale;
+  canvas.height = window.innerHeight * scale;
+  canvas.style.width = "100vw";
+  canvas.style.height = "100vh";
     }
     window.addEventListener("resize", resize);
     resize();
@@ -294,7 +297,7 @@
         const color = factionColors[a.factionId] || "white";
         const x = offsetX + a.x * s;
         const y = offsetY + a.y * s;
-        const r = a.radius * s;
+        const r = a.r * s;
 
         ctx.fillStyle = color;
         ctx.beginPath();
