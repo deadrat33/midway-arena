@@ -50,8 +50,8 @@ function ensureInitialFactions() {
     };
     arenaState.factions.push(f1, f2);
 
-    spawnAgentsForFaction(f1, 70);
-    spawnAgentsForFaction(f2, 70);
+    spawnAgentsForFaction(f1, 33);
+    spawnAgentsForFaction(f2, 33);
   }
 }
 
